@@ -1,0 +1,545 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Untitled1.ipynb",
+      "provenance": [],
+      "collapsed_sections": [],
+      "authorship_tag": "ABX9TyPLgPGbZdWrmPA2B28FaVHz",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/LucaIorio26/prova/blob/main/Untitled1.py\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "P3ooet6S0EkE"
+      },
+      "source": [
+        "import numpy as np\n",
+        "import pandas as pd\n",
+        "import seaborn as sns\n",
+        "import matplotlib.pyplot as plt\n",
+        "\n",
+        "\n",
+        "from sklearn.preprocessing import StandardScaler, Normalizer\n",
+        "from sklearn.model_selection import train_test_split, GridSearchCV, KFold\n",
+        "\n",
+        "from sklearn.ensemble  import RandomForestClassifier, GradientBoostingClassifier\n",
+        "from sklearn.linear_model import LogisticRegression\n",
+        "from sklearn.svm import SVC\n",
+        "from sklearn.naive_bayes import GaussianNB\n",
+        "from sklearn.neighbors import KNeighborsClassifier\n",
+        "from sklearn.tree import DecisionTreeClassifier\n",
+        "\n",
+        "from sklearn import metrics\n",
+        "import pickle\n"
+      ],
+      "execution_count": 4,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 417
+        },
+        "id": "H5K0t4NWxj3J",
+        "outputId": "fe338840-bc1f-40f3-def7-0fdbb8fa4b61"
+      },
+      "source": [
+        "df = pd.read_csv('/content/heart_failure_clinical_records_dataset.csv', sep = ';')\n",
+        "df"
+      ],
+      "execution_count": 5,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>age</th>\n",
+              "      <th>anaemia</th>\n",
+              "      <th>creatinine_phosphokinase</th>\n",
+              "      <th>diabetes</th>\n",
+              "      <th>ejection_fraction</th>\n",
+              "      <th>high_blood_pressure</th>\n",
+              "      <th>platelets</th>\n",
+              "      <th>serum_creatinine</th>\n",
+              "      <th>serum_sodium</th>\n",
+              "      <th>sex</th>\n",
+              "      <th>smoking</th>\n",
+              "      <th>time</th>\n",
+              "      <th>DEATH_EVENT</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>75</td>\n",
+              "      <td>0</td>\n",
+              "      <td>582</td>\n",
+              "      <td>0</td>\n",
+              "      <td>20</td>\n",
+              "      <td>1</td>\n",
+              "      <td>265000</td>\n",
+              "      <td>19</td>\n",
+              "      <td>130</td>\n",
+              "      <td>1</td>\n",
+              "      <td>0</td>\n",
+              "      <td>4</td>\n",
+              "      <td>1</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>55</td>\n",
+              "      <td>0</td>\n",
+              "      <td>7861</td>\n",
+              "      <td>0</td>\n",
+              "      <td>38</td>\n",
+              "      <td>0</td>\n",
+              "      <td>26335803</td>\n",
+              "      <td>11</td>\n",
+              "      <td>136</td>\n",
+              "      <td>1</td>\n",
+              "      <td>0</td>\n",
+              "      <td>6</td>\n",
+              "      <td>1</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>65</td>\n",
+              "      <td>0</td>\n",
+              "      <td>146</td>\n",
+              "      <td>0</td>\n",
+              "      <td>20</td>\n",
+              "      <td>0</td>\n",
+              "      <td>162000</td>\n",
+              "      <td>13</td>\n",
+              "      <td>129</td>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>7</td>\n",
+              "      <td>1</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>50</td>\n",
+              "      <td>1</td>\n",
+              "      <td>111</td>\n",
+              "      <td>0</td>\n",
+              "      <td>20</td>\n",
+              "      <td>0</td>\n",
+              "      <td>210000</td>\n",
+              "      <td>19</td>\n",
+              "      <td>137</td>\n",
+              "      <td>1</td>\n",
+              "      <td>0</td>\n",
+              "      <td>7</td>\n",
+              "      <td>1</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>65</td>\n",
+              "      <td>1</td>\n",
+              "      <td>160</td>\n",
+              "      <td>1</td>\n",
+              "      <td>20</td>\n",
+              "      <td>0</td>\n",
+              "      <td>327000</td>\n",
+              "      <td>27</td>\n",
+              "      <td>116</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>8</td>\n",
+              "      <td>1</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>...</th>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "      <td>...</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>294</th>\n",
+              "      <td>62</td>\n",
+              "      <td>0</td>\n",
+              "      <td>61</td>\n",
+              "      <td>1</td>\n",
+              "      <td>38</td>\n",
+              "      <td>1</td>\n",
+              "      <td>155000</td>\n",
+              "      <td>11</td>\n",
+              "      <td>143</td>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>270</td>\n",
+              "      <td>0</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>295</th>\n",
+              "      <td>55</td>\n",
+              "      <td>0</td>\n",
+              "      <td>1820</td>\n",
+              "      <td>0</td>\n",
+              "      <td>38</td>\n",
+              "      <td>0</td>\n",
+              "      <td>270000</td>\n",
+              "      <td>12</td>\n",
+              "      <td>139</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>271</td>\n",
+              "      <td>0</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>296</th>\n",
+              "      <td>45</td>\n",
+              "      <td>0</td>\n",
+              "      <td>2060</td>\n",
+              "      <td>1</td>\n",
+              "      <td>60</td>\n",
+              "      <td>0</td>\n",
+              "      <td>742000</td>\n",
+              "      <td>8</td>\n",
+              "      <td>138</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>278</td>\n",
+              "      <td>0</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>297</th>\n",
+              "      <td>45</td>\n",
+              "      <td>0</td>\n",
+              "      <td>2413</td>\n",
+              "      <td>0</td>\n",
+              "      <td>38</td>\n",
+              "      <td>0</td>\n",
+              "      <td>140000</td>\n",
+              "      <td>14</td>\n",
+              "      <td>140</td>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>280</td>\n",
+              "      <td>0</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>298</th>\n",
+              "      <td>50</td>\n",
+              "      <td>0</td>\n",
+              "      <td>196</td>\n",
+              "      <td>0</td>\n",
+              "      <td>45</td>\n",
+              "      <td>0</td>\n",
+              "      <td>395000</td>\n",
+              "      <td>16</td>\n",
+              "      <td>136</td>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>285</td>\n",
+              "      <td>0</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "<p>299 rows × 13 columns</p>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "     age  anaemia  creatinine_phosphokinase  ...  smoking  time  DEATH_EVENT\n",
+              "0     75        0                       582  ...        0     4            1\n",
+              "1     55        0                      7861  ...        0     6            1\n",
+              "2     65        0                       146  ...        1     7            1\n",
+              "3     50        1                       111  ...        0     7            1\n",
+              "4     65        1                       160  ...        0     8            1\n",
+              "..   ...      ...                       ...  ...      ...   ...          ...\n",
+              "294   62        0                        61  ...        1   270            0\n",
+              "295   55        0                      1820  ...        0   271            0\n",
+              "296   45        0                      2060  ...        0   278            0\n",
+              "297   45        0                      2413  ...        1   280            0\n",
+              "298   50        0                       196  ...        1   285            0\n",
+              "\n",
+              "[299 rows x 13 columns]"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 5
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "atZVGxZYye9Q"
+      },
+      "source": [
+        "df.describe()"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "VV-qmDUNHisz"
+      },
+      "source": [
+        "# si devono rimuovere alcuni valori anomali in age "
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "X2b9V1Vpym0M"
+      },
+      "source": [
+        "\n",
+        "sns.scatterplot(data=df,x='age',y='ejection_fraction',hue='DEATH_EVENT')\n",
+        "sns.displot(df.age)\n",
+        "\n",
+        "\n"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "eem_4-xUFVyL"
+      },
+      "source": [
+        "y = df['DEATH_EVENT']\n",
+        "X = df[['age','creatinine_phosphokinase','ejection_fraction','platelets','serum_creatinine','serum_sodium']]\n",
+        "\n",
+        "scaler = StandardScaler()\n",
+        "scaler.fit(X)\n",
+        "X_scale = scaler.transform(X)"
+      ],
+      "execution_count": 6,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 128
+        },
+        "id": "rgyE4OrdG0e1",
+        "outputId": "8dbe475d-bc56-4084-e5dd-4cb630163339"
+      },
+      "source": [
+        "qualitative = "
+      ],
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "SyntaxError",
+          "evalue": "ignored",
+          "traceback": [
+            "\u001b[0;36m  File \u001b[0;32m\"<ipython-input-6-9e8014e54f76>\"\u001b[0;36m, line \u001b[0;32m1\u001b[0m\n\u001b[0;31m    qualitative =\u001b[0m\n\u001b[0m                  ^\u001b[0m\n\u001b[0;31mSyntaxError\u001b[0m\u001b[0;31m:\u001b[0m invalid syntax\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "10rQYiO3Fd57",
+        "outputId": "28e7fda0-ca3c-4ccf-eca1-d5aff4ce43d6"
+      },
+      "source": [
+        "X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1234, stratify=y, test_size=.30)\n",
+        "print(X_train.shape, X_test.shape, y_train.shape, y_test.shape)"
+      ],
+      "execution_count": 7,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "(209, 6) (90, 6) (209,) (90,)\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "CYW8oSfzFV08"
+      },
+      "source": [
+        "log_reg = LogisticRegression()\n",
+        "knn = KNeighborsClassifier()\n",
+        "trees = DecisionTreeClassifier()\n",
+        "rand_forest = RandomForestClassifier()\n",
+        "svm = SVC()\n",
+        "naive = GaussianNB()\n",
+        "xgb = GradientBoostingClassifier()"
+      ],
+      "execution_count": 8,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "2_COGALbxRFM"
+      },
+      "source": [
+        "# TUNING HYPERPARAMETERS\n",
+        "grid_svm = [{'kernel': ['rbf'],'C': [0.1, 0.5, 1]},\n",
+        "            {'kernel': ['linear', 'poly'],  'C': [0.1, 0.5, 1]}]\n",
+        "\n",
+        "grid_rand_forest = {\n",
+        "    'bootstrap': [True],\n",
+        "    'max_depth': [80, 90, 100, 110],\n",
+        "    'max_features': [2, 3],\n",
+        "    'min_samples_leaf': [3, 4, 5],\n",
+        "    'min_samples_split': [8, 10],\n",
+        "    'n_estimators': [100, 200, 300, 500]}\n",
+        "\n",
+        "#grid_log_reg = {'C': [0.01, 0.1, 1]}\n",
+        "\n",
+        "grid_knn = {'n_neighbors':[2,3,4,5,6,7,8,9,10,12,15,18,20,25], 'metric':['manhattan','euclidean']}\n",
+        "\n",
+        "grid_tree = {'criterion':['gini','entropy'],'max_depth':[3,4,5,6,7,8,9,10,20,50,75,100]}\n",
+        "\n",
+        "grid_xgb = {\"criterion\": [\"friedman_mse\",  \"mae\"],\n",
+        "              \"loss\":[\"deviance\",\"exponential\"],\n",
+        "              \"max_features\":[\"log2\",\"sqrt\"],\n",
+        "              'learning_rate': [0.01,0.05,0.1,1],\n",
+        "              'max_depth': [3,4,5],\n",
+        "              'min_samples_leaf': [4,5,6],\n",
+        "              'subsample': [0.6,0.7,0.8],\n",
+        "              'n_estimators': [50,100]}\n",
+        "\n",
+        "\n",
+        "\n",
+        "#log_reg_cv = GridSearchCV(log_reg, grid_log_reg, cv=5, return_train_score=True)\n",
+        "#log_reg_cv.fit(X_train,y_train)\n",
+        "#pred_log_reg_cv = log_reg_cv.predict(X_test)\n",
+        "#score_log_reg_cv = log_reg_cv.score(X_test,y_test)\n",
+        "\n",
+        "\n",
+        "knn_cv = GridSearchCV(knn, grid_knn, cv=5, return_train_score=True)\n",
+        "knn_cv.fit(X_train,y_train)\n",
+        "pred_knn_cv = knn_cv.predict(X_test)\n",
+        "score_knn_cv = knn_cv.score(X_test,y_test)\n",
+        "\n",
+        "\n",
+        "svm_cv = GridSearchCV(svm, grid_svm, cv=5, return_train_score=True)\n",
+        "svm_cv.fit(X_train,y_train)\n",
+        "pred_svm_cv = svm_cv.predict(X_test)\n",
+        "score_svm_cv = svm_cv.score(X_test,y_test)\n",
+        "\n",
+        "tree_cv = GridSearchCV(trees, grid_tree, cv=5, return_train_score=True)\n",
+        "tree_cv.fit(X_train,y_train)\n",
+        "pred_tree_cv = tree_cv.predict(X_test)\n",
+        "score_tree_cv = tree_cv.score(X_test,y_test)\n",
+        "\n",
+        "\n",
+        "rand_forest_cv = GridSearchCV(rand_forest, grid_rand_forest, cv=5, return_train_score=True)\n",
+        "rand_forest_cv.fit(X_train, y_train)\n",
+        "pred_rand_forest_cv = rand_forest_cv.predict(X_test)\n",
+        "score_rand_forest_cv = rand_forest_cv.score(X_test, y_test)\n",
+        "\n",
+        "\n",
+        "xgb_cv = GridSearchCV(xgb, grid_xgb, cv=5, return_train_score=True)\n",
+        "xgb_cv.fit(X_train, y_train)\n",
+        "pred_xgb_cv = xgb_cv.predict(X_test)\n",
+        "score_xgb_cv = xgb_cv.score(X_test, y_test)"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "hRbANJQhH3pJ"
+      },
+      "source": [
+        "# ACCURACY\n",
+        "accuracy = [score_knn_cv, score_tree_cv, score_rand_forest_cv, score_svm_cv, score_xgb_cv] # manca la logistica\n",
+        "algorithm = ['KNN', 'DECISION TREE', 'RANDOM FOREST', 'SVM', 'XGB']\n",
+        "data_plot = pd.DataFrame(accuracy,algorithm)\n",
+        "sns.catplot(data=data_plot, x=accuracy, y=algorithm, kind='bar', col_order=accuracy.sort(),height=6,aspect=2)"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "gV3wn4Y7H3AG"
+      },
+      "source": [
+        "# save the model to disk\n",
+        "filename = 'finalized_model.sav'\n",
+        "pickle.dump(model, open(filename, 'wb'))\n",
+        " \n",
+        "# some time later...\n",
+        " \n",
+        "# load the model from disk\n",
+        "loaded_model = pickle.load(open(filename, 'rb'))\n",
+        "result = loaded_model.score(X_test, Y_test)\n",
+        "print(result)"
+      ],
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
